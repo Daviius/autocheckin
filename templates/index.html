@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head><title>Automation Web Control</title></head>
+<body>
+<h2>Automation Control Panel</h2>
+
+<label>Project:</label>
+<select id="project">
+{% for p in projects %}
+<option value="{{p}}">{{p}}</option>
+{% endfor %}
+</select><br><br>
+
+<label>Excel (server path):</label>
+<input id="excel" value="checkin.xlsx"><br><br>
+
+<label>Concurrent:</label>
+<input id="concurrent" value="3"><br><br>
+
+<button onclick="start()">START</button>
+<button onclick="stop()">STOP</button>
+
+<pre id="log" style="height:300px;overflow:auto;border:1px solid #ccc"></pre>
+
+<script>
+function start(){
+ fetch("/start",{
+  method:"POST",
+  headers:{"Content-Type":"application/x-www-form-urlencoded"},
+  body:`project=${project.value}&excel=${excel.value}&concurrent=${concurrent.value}`
+ })
+}
+function stop(){ fetch("/stop",{method:"POST"}) }
+
+var evt = new EventSource("/logs");
+evt.onmessage = e => {
+ log.textContent += e.data + "\n";
+ log.scrollTop = log.scrollHeight;
+}
+</script>
+</body>
+</html>
